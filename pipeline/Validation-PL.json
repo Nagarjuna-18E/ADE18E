@@ -1,0 +1,30 @@
+{
+	"name": "Validation-PL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Validation1",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_adls_dev_apac1",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": "customers.txt"
+						}
+					},
+					"timeout": "0.12:00:00",
+					"sleep": 2
+				}
+			}
+		],
+		"folder": {
+			"name": "dev-apac"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-02-10T13:19:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

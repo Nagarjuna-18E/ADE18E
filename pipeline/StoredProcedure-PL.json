@@ -1,0 +1,43 @@
+{
+	"name": "StoredProcedure-PL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[SalesLT].[usp_UpdateEmployee]",
+					"storedProcedureParameters": {
+						"eid": {
+							"value": "102",
+							"type": "Int32"
+						},
+						"ename": {
+							"value": "Virat",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "dev-apac"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-02-11T13:10:29Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

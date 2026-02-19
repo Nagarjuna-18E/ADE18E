@@ -1,0 +1,102 @@
+{
+	"name": "if-PL",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Lookup ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Lookup ADLS').output.firstRow.Prop_0,formatDateTime(utcNow(),'yyyyMMdd'))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "var-false",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "temp",
+								"value": "111"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "var-true",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "temp",
+								"value": "999"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup ADLS",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_adls_dev_apac1",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": "customers_semicolon_dup.csv"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"temp": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "dev-apac"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-02-10T07:14:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

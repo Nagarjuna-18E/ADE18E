@@ -1,0 +1,107 @@
+{
+	"name": "Switch-Case-PL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Switch Var",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "temp",
+					"value": "EU"
+				}
+			},
+			{
+				"name": "Switch1",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "Switch Var",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@variables('temp')",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "EU",
+							"activities": [
+								{
+									"name": "EU VAR",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "temp",
+										"value": "1000"
+									}
+								}
+							]
+						},
+						{
+							"value": "EU2",
+							"activities": [
+								{
+									"name": "EU2 Vaar",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "temp",
+										"value": "1"
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "default Var",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "temp",
+								"value": "999"
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"temp": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "dev-apac"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-02-10T08:00:39Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,65 @@
+{
+	"name": "pipeline1_Wait",
+	"properties": {
+		"description": "This is my first pipeline using wait ",
+		"activities": [
+			{
+				"name": "Wait1",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": {
+						"value": "@pipeline().globalParameters.gb_wait_sec",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "cur_date",
+					"value": {
+						"value": "@formatDateTime(utcNow(), 'yyyy')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"wait_secs1": {
+				"type": "int",
+				"defaultValue": 2
+			},
+			"wait_secs2": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"cur_date": {
+				"type": "String"
+			},
+			"pipeline_name": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-01-29T13:15:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

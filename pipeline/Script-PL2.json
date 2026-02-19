@@ -1,0 +1,39 @@
+{
+	"name": "Script-PL2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "INSERT INTO SalesLT.Employees (eid, ename)\nVALUES (103, 'Narendra');"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "dev-apac"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-02-11T13:16:30Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

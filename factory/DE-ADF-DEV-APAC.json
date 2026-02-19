@@ -1,0 +1,17 @@
+{
+	"name": "DE-ADF-DEV-APAC",
+	"properties": {
+		"globalParameters": {
+			"gb_wait_sec": {
+				"type": "int",
+				"value": 2
+			}
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d3504e91-ab94-481b-8e7d-b6af9fc06d41",
+		"tenantId": "79c33409-b26c-4714-a6b7-25c3a94fb344"
+	}
+}
