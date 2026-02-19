@@ -1,0 +1,6 @@
+{
+	"gb_wait_sec": {
+		"type": "int",
+		"value": 2
+	}
+}

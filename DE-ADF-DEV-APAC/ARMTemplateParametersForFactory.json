@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "DE-ADF-DEV-APAC"
+		},
+		"LS_ADB_password": {
+			"value": ""
+		},
+		"LS_ADLS_accountKey": {
+			"value": ""
+		},
+		"LS_ADB_properties_typeProperties_server": {
+			"value": "nag-abila01.database.windows.net"
+		},
+		"LS_ADB_properties_typeProperties_database": {
+			"value": "db-dev_apac"
+		},
+		"LS_ADB_properties_typeProperties_userName": {
+			"value": "abadmin"
+		},
+		"LS_ADLS_properties_typeProperties_url": {
+			"value": "https://devapac1storage.dfs.core.windows.net/"
+		}
+	}
+}
