@@ -1,0 +1,122 @@
+{
+	"name": "SUB-LOAD-PL",
+	"properties": {
+		"activities": [
+			{
+				"name": "SRC STG",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SUB-PL-SRC-STG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"src_table": {
+							"value": "@pipeline().parameters.src_table",
+							"type": "Expression"
+						},
+						"src_schema": {
+							"value": "@pipeline().parameters.src_schema",
+							"type": "Expression"
+						},
+						"tar_table": {
+							"value": "@pipeline().parameters.tar_table",
+							"type": "Expression"
+						},
+						"tar_schema": {
+							"value": "@pipeline().parameters.tar_schema",
+							"type": "Expression"
+						},
+						"main_process_id": {
+							"value": "@pipeline().parameters.main_process_id",
+							"type": "Expression"
+						},
+						"sub_process_id": {
+							"value": "@pipeline().parameters.sub_process_id",
+							"type": "Expression"
+						},
+						"watermark_start_value": {
+							"value": "@pipeline().parameters.watermark_start_value",
+							"type": "Expression"
+						},
+						"watermark_column": {
+							"value": "@pipeline().parameters.watermark_column",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "STG - TAR",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SRC STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SUB-PL-STG-TAR",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"src_sch": {
+							"value": "@pipeline().parameters.src_schema",
+							"type": "Expression"
+						},
+						"tar_tab": {
+							"value": "@pipeline().parameters.tar_table",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"src_schema": {
+				"type": "string"
+			},
+			"src_table": {
+				"type": "string"
+			},
+			"tar_schema": {
+				"type": "string"
+			},
+			"tar_table": {
+				"type": "string"
+			},
+			"main_process_id": {
+				"type": "string"
+			},
+			"sub_process_id": {
+				"type": "string"
+			},
+			"watermark_start_value": {
+				"type": "string"
+			},
+			"watermark_column": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Ingestion Framework"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-03-09T07:36:04Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

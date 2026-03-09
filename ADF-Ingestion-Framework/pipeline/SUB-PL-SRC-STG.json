@@ -1,0 +1,529 @@
+{
+	"name": "SUB-PL-SRC-STG",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "SUB ST",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "@concat(\n'SELECT * FROM ANALYTICS_SCHEMA.',pipeline().parameters.src_table,\n' WHERE ',\npipeline().parameters.watermark_column,\n' BETWEEN CAST(''',\npipeline().parameters.watermark_start_value,\n''' AS datetime2) AND CAST(''',\nvariables('Watermark EV'),\n''' AS datetime2)'\n)",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "@concat(\n'TRUNCATE TABLE ',\npipeline().parameters.src_schema,\n'.',\nvariables('stage_table')\n)",
+							"type": "Expression"
+						},
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AZURE_DB_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"TBL_NAME": {
+								"value": "@pipeline().parameters.src_table",
+								"type": "Expression"
+							},
+							"SCH_NAME": {
+								"value": "@pipeline().parameters.src_schema",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AZURE_DB_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"TBL_NAME": {
+								"value": "@variables('stage_table')",
+								"type": "Expression"
+							},
+							"SCH_NAME": {
+								"value": "@pipeline().parameters.src_schema",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Stage Table",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "stage_table",
+					"value": {
+						"value": "@concat('STG_',pipeline().parameters.tar_table)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SUB ST",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "End Value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "sub_process_st",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SUB ET",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "sub_process_et",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "SUB ET",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Reporting].[SP_INSERT_LOG_TABLE]",
+					"storedProcedureParameters": {
+						"LAST_UPDATED_TIME": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"MAIN_PROCESS_ID": {
+							"value": {
+								"value": "@pipeline().parameters.main_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"RECORDS_COUNT": {
+							"value": {
+								"value": "@activity('Copy data1').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"SUB_PROCESS_END_TIME": {
+							"value": {
+								"value": "@variables('sub_process_et')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"SUB_PROCESS_ID": {
+							"value": {
+								"value": "@pipeline().parameters.sub_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"SUB_PROCESS_RESULT": {
+							"value": "SUCCESS",
+							"type": "String"
+						},
+						"SUB_PROCESS_START_TIME": {
+							"value": {
+								"value": "@variables('sub_process_st')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SUB ET_copy1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "sub_process_et",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Stored procedure1_copy1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "SUB ET_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Reporting].[SP_INSERT_LOG_TABLE]",
+					"storedProcedureParameters": {
+						"LAST_UPDATED_TIME": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"MAIN_PROCESS_ID": {
+							"value": {
+								"value": "@pipeline().parameters.main_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"RECORDS_COUNT": {
+							"value": {
+								"value": "-100",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"SUB_PROCESS_END_TIME": {
+							"value": {
+								"value": "@variables('sub_process_et')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"SUB_PROCESS_ID": {
+							"value": {
+								"value": "@pipeline().parameters.sub_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"SUB_PROCESS_RESULT": {
+							"value": "FAILED",
+							"type": "String"
+						},
+						"SUB_PROCESS_START_TIME": {
+							"value": {
+								"value": "@variables('sub_process_st')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "End Value",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Stage Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Watermark EV",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "UPDATE CONTROL TABLE",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Stored procedure1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Analytics_Schema].[SP_UP_CONTROL_TABLE]",
+					"storedProcedureParameters": {
+						"LAST_MAIN_PROCESSID": {
+							"value": {
+								"value": "@pipeline().parameters.main_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"LAST_SUB_PROCESS_RESULT": {
+							"value": "SUCCESS",
+							"type": "String"
+						},
+						"LAST_SUB_PROCESSID": {
+							"value": {
+								"value": "@pipeline().parameters.sub_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"RUN_STATUS": {
+							"value": "SUCCESS",
+							"type": "String"
+						},
+						"SOURCE_TABLE": {
+							"value": {
+								"value": "@pipeline().parameters.src_table",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"WATERMARK_VALUE": {
+							"value": {
+								"value": "@variables('Watermark EV')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "UPDATE CONTROL TABLE_copy1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Stored procedure1_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[Analytics_Schema].[SP_UP_CONTROL_TABLE]",
+					"storedProcedureParameters": {
+						"LAST_MAIN_PROCESSID": {
+							"value": {
+								"value": "@pipeline().parameters.main_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"LAST_SUB_PROCESS_RESULT": {
+							"value": "FAIL",
+							"type": "String"
+						},
+						"LAST_SUB_PROCESSID": {
+							"value": {
+								"value": "@pipeline().parameters.sub_process_id",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"RUN_STATUS": {
+							"value": "FAIL",
+							"type": "String"
+						},
+						"SOURCE_TABLE": {
+							"value": {
+								"value": "@pipeline().parameters.src_table",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"WATERMARK_VALUE": {
+							"value": {
+								"value": "@pipeline().parameters.watermark_start_value",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"src_table": {
+				"type": "string"
+			},
+			"src_schema": {
+				"type": "string"
+			},
+			"tar_table": {
+				"type": "string"
+			},
+			"tar_schema": {
+				"type": "string"
+			},
+			"main_process_id": {
+				"type": "string"
+			},
+			"sub_process_id": {
+				"type": "string"
+			},
+			"watermark_start_value": {
+				"type": "string"
+			},
+			"watermark_column": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"stage_table": {
+				"type": "String"
+			},
+			"sub_process_st": {
+				"type": "String"
+			},
+			"sub_process_et": {
+				"type": "String"
+			},
+			"Watermark EV": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Ingestion Framework"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-03-09T10:40:36Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

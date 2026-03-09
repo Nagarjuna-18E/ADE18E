@@ -1,0 +1,9 @@
+{
+	"name": "PBWM-ADF",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "40d07dca-ce90-4216-a47f-7fbfb639ff42",
+		"tenantId": "45c9a516-7504-4c4f-af81-e4776ce03511"
+	}
+}

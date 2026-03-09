@@ -1,0 +1,46 @@
+{
+	"name": "SUB-PL-STG-TAR",
+	"properties": {
+		"activities": [
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": {
+						"value": "@concat(pipeline().parameters.src_sch,'.SP_MERGE_',pipeline().parameters.tar_tab)",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDB",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"src_sch": {
+				"type": "string",
+				"defaultValue": "ANALYTICS_SCHEMA"
+			},
+			"tar_tab": {
+				"type": "string",
+				"defaultValue": "TRANSACTIONS"
+			}
+		},
+		"folder": {
+			"name": "Ingestion Framework"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-03-09T09:23:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
