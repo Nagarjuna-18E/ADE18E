@@ -1,0 +1,70 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "PBWM-ADF"
+		},
+		"AzureDB_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureDB'"
+		},
+		"AzureDB_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "nagserver01d.database.windows.net"
+		},
+		"AzureDB_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "PBWM-DB"
+		},
+		"AzureDB_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "abadmin"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "PBWM-ADF_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureDB_password": {
+						"value": "[parameters('AzureDB_password')]"
+					},
+					"AzureDB_properties_typeProperties_server": {
+						"value": "[parameters('AzureDB_properties_typeProperties_server')]"
+					},
+					"AzureDB_properties_typeProperties_database": {
+						"value": "[parameters('AzureDB_properties_typeProperties_database')]"
+					},
+					"AzureDB_properties_typeProperties_userName": {
+						"value": "[parameters('AzureDB_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
